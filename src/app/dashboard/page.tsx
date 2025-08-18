@@ -1,33 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useChains } from '@/lib/hooks/use-chains';
-import { signOutUser } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
-import type { Chain } from '@/types';
+import { ChainCard } from '@/components/features';
+import { DashboardHeader } from '@/components/layout';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const { chains, loading: chainsLoading, error } = useChains();
   const router = useRouter();
-  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/signin');
     }
   }, [user, authLoading, router]);
-
-  const handleSignOut = async () => {
-    setSigningOut(true);
-    const { error } = await signOutUser();
-    if (!error) {
-      router.push('/');
-    }
-    setSigningOut(false);
-  };
 
   const handleCreateChain = () => {
     router.push('/dashboard/create');
@@ -51,25 +41,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-light text-black">Chain Builder</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Welcome back, {user.displayName || user.email?.split('@')[0]}
-            </p>
-          </div>
-          <Button
-            onClick={handleSignOut}
-            disabled={signingOut}
-            variant="outline"
-            className="border-gray-200 text-gray-700 hover:bg-gray-50"
-          >
-            {signingOut ? 'Signing out...' : 'Sign Out'}
-          </Button>
-        </div>
-      </header>
+      <DashboardHeader user={user} />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-12">
@@ -127,78 +99,6 @@ export default function Dashboard() {
           </>
         )}
       </main>
-    </div>
-  );
-}
-
-
-
-// Enhanced Chain Card Component
-interface ChainCardProps {
-  chain: Chain;
-  onClick: () => void;
-}
-
-function ChainCard({ chain, onClick }: ChainCardProps) {
-  const completedSteps = chain.steps.filter(step => step.isCompleted).length;
-  const totalSteps = chain.steps.length;
-  const progressPercentage = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
-
-  return (
-    <div
-      onClick={onClick}
-      className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer group"
-    >
-      {/* Card Header */}
-      <div className="mb-6">
-        <h3 className="text-xl font-medium text-black mb-3 group-hover:text-gray-800 transition-colors">
-          {chain.title}
-        </h3>
-        {chain.description && (
-          <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
-            {chain.description}
-          </p>
-        )}
-      </div>
-
-      {/* Progress Section */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between text-sm text-gray-700 mb-3">
-          <span className="font-medium">Progress</span>
-          <span className="font-semibold">{completedSteps}/{totalSteps} steps</span>
-        </div>
-        <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-          <div
-            className="bg-black h-full rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${progressPercentage}%` }}
-          />
-        </div>
-        {progressPercentage > 0 && (
-          <p className="text-xs text-gray-500 mt-2">
-            {Math.round(progressPercentage)}% complete
-          </p>
-        )}
-      </div>
-
-      {/* Card Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-        <div className="flex flex-col">
-          <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-            Category
-          </span>
-          <span className="text-sm text-gray-700 capitalize font-medium">
-            {chain.category.replace('_', ' ')}
-          </span>
-        </div>
-        <div className="flex flex-col text-right">
-          <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-            Method
-          </span>
-          <span className="text-sm text-gray-700 capitalize font-medium">
-            {chain.chainingMethod.replace('_', ' ')}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

@@ -1,17 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useChains } from '@/lib/hooks/use-chains';
+import { deleteChain } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { ChainCard } from '@/components/features';
 import { DashboardHeader } from '@/components/layout';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const { chains, loading: chainsLoading, error } = useChains();
   const router = useRouter();
+  const [deletingChainId, setDeletingChainId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -24,7 +27,30 @@ export default function Dashboard() {
   };
 
   const handleChainClick = (chainId: string) => {
-    router.push(`/dashboard/chains/${chainId}`);
+    router.push(`/chains/${chainId}`);
+  };
+
+  const handleEditChain = (chainId: string) => {
+    router.push(`/chains/${chainId}/edit`);
+  };
+
+  const handleDeleteChain = async (chainId: string) => {
+    setDeletingChainId(chainId);
+    
+    try {
+      const { error } = await deleteChain(chainId);
+      
+      if (error) {
+        throw new Error(error);
+      }
+      
+      // Success - the real-time listener will automatically update the UI
+    } catch (error: any) {
+      console.error('Failed to delete chain:', error);
+      alert(`Failed to delete chain: ${error.message || 'Unknown error'}`);
+    } finally {
+      setDeletingChainId(null);
+    }
   };
 
   if (authLoading) {
@@ -93,6 +119,9 @@ export default function Dashboard() {
                   key={chain.id}
                   chain={chain}
                   onClick={() => handleChainClick(chain.id)}
+                  onEdit={() => handleEditChain(chain.id)}
+                  onDelete={() => handleDeleteChain(chain.id)}
+                  isDeleting={deletingChainId === chain.id}
                 />
               ))}
             </div>

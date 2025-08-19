@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import type { User } from 'firebase/auth';
 
 interface DashboardHeaderProps {
-  user: User;
+  user: User | null;
   title?: string;
   subtitle?: string;
 }
@@ -29,7 +29,7 @@ export function DashboardHeader({
     setSigningOut(false);
   };
 
-  const defaultSubtitle = `Welcome back, ${user.displayName || user.email?.split('@')[0]}`;
+  const defaultSubtitle = user ? `Welcome back, ${user.displayName || user.email?.split('@')[0]}` : 'Loading...';
 
   return (
     <header className="border-b border-gray-100">
@@ -42,7 +42,7 @@ export function DashboardHeader({
         </div>
         <Button
           onClick={handleSignOut}
-          disabled={signingOut}
+          disabled={signingOut || !user}
           variant="outline"
           className="border-gray-200 text-gray-700 hover:bg-gray-50"
         >

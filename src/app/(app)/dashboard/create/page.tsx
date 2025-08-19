@@ -43,7 +43,7 @@ export default function CreateChain() {
       if (createError) {
         throw new Error(createError);
       }
-      router.push(`/dashboard/chains/${chainId}/edit`);
+      router.push(`/chains/${chainId}/edit`);
     } catch (err: any) {
       setError(err.message || 'Failed to create chain');
     } finally {

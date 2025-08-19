@@ -31,6 +31,9 @@ export interface Step {
   order: number;
   isCompleted: boolean;
   isTarget: boolean; // Current target step in training
+  estimatedTime?: number; // in seconds
+  actualTime?: number; // in seconds
+  hasTimer: boolean; // whether user added a timer to this step
   createdAt: Date;
   updatedAt: Date;
 }

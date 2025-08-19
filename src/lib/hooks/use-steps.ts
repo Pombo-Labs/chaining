@@ -12,6 +12,9 @@ export const useSteps = (initialSteps: Step[] = []) => {
       order: steps.length + 1,
       isCompleted: false,
       isTarget: steps.length === 0,
+      hasTimer: false,
+      estimatedTime: 0,
+      actualTime: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

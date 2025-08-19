@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Timer } from '@/components/ui/timer';
 import type { Step } from '@/types';
 
 interface StepEditorProps {
@@ -59,6 +60,32 @@ export function StepEditor({
               rows={2}
               className="w-full resize-none"
             />
+          </div>
+
+          {/* Timer Section */}
+          <div className="border-t border-gray-100 pt-4">
+            {!step.hasTimer ? (
+              <Button
+                onClick={() => onUpdate(step.id, { hasTimer: true, estimatedTime: 0 })}
+                variant="outline"
+                size="sm"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                + Add Timer
+              </Button>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">Timer enabled</span>
+                <Button
+                  onClick={() => onUpdate(step.id, { hasTimer: false, estimatedTime: 0, actualTime: 0 })}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Remove Timer
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 

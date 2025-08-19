@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { getChain, createTrainingSession } from '@/lib/firebase/firestore';
@@ -8,7 +8,8 @@ import { DashboardHeader } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import type { Chain } from '@/types';
+import { StepTimer } from '@/components/training';
+import type { Chain, TrainingSession, StepResult as TypesStepResult } from '@/types';
 
 type StepStatus = 'skipped' | 'prompted' | 'independent' | 'not_attempted';
 
@@ -17,6 +18,7 @@ interface StepResult {
   status: StepStatus;
   notes: string;
 }
+
 
 export default function TrainChainPage() {
   const { chainId } = useParams();
@@ -359,6 +361,23 @@ export default function TrainChainPage() {
                           </Button>
                         </div>
                       </div>
+
+                      {/* Timer Section - Only show if step has timer enabled */}
+                      {step.hasTimer && isSelected && (
+                        <StepTimer 
+                          stepId={step.id}
+                          initialTime={step.actualTime || 0}
+                          onTimeUpdate={(stepId: string, time: number) => {
+                            setChain(prev => {
+                              if (!prev) return null;
+                              const updatedSteps = prev.steps.map(s => 
+                                s.id === stepId ? { ...s, actualTime: time } : s
+                              );
+                              return { ...prev, steps: updatedSteps };
+                            });
+                          }}
+                        />
+                      )}
 
                       {/* Notes */}
                       <div>
